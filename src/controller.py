@@ -43,7 +43,6 @@ class Controller(nn.Module):
 
         self._init_params()
         self.logger.info("Finished controller setup %s", str('.'*20))
-        return
 
     def _init_params(self):
         """
@@ -67,7 +66,6 @@ class Controller(nn.Module):
 
         self.logger.info("Finished Initializing parameters %s", str('.'*20))
         self._reset_params()
-        return
         
     def _reset_params(self):
         """
@@ -81,7 +79,6 @@ class Controller(nn.Module):
         nn.init.uniform_(self.w_lstm.weight_hh_l0, -0.1, 0.1)
         nn.init.uniform_(self.w_lstm.weight_ih_l0, -0.1, 0.1)
         self.logger.info("Finished Resetting parameters %s", str('.'*20))
-        return
 
     def forward(self):
         """
@@ -162,7 +159,6 @@ class Controller(nn.Module):
                 skip_count.append(torch.sum(skip))
                 inputs - torch.matmul(skip, torch.cat(anchors, dim=0))
                 inputs /= (1.0 + torch.sum(skip))
-
             else:
                 inputs = self.g_emb.weight
 
@@ -176,4 +172,3 @@ class Controller(nn.Module):
         self.sample_log_probs = torch.sum(log_probs)
         skip_count = torch.starck(skip_penalties)
         self.skip_penalties = torch.mean(skip_penalties)        
-    return
