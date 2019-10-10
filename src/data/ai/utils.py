@@ -33,7 +33,7 @@ def get_layer_properties(layer, batch_size, input_size):
     H = input_size[0]
     F = input_size[1]
     B = batch_size
-    numerator = B*F*H*M*N*K*K
-    denominator = (M*N*K*K)+(B*(M+N)*F*H)
+    numerator = (B*F*H*M*N*K*K)/G
+    denominator = (M*N*K*K)+((B*(M+N)*F*H)/G)
     macs = B*M*N*K*K*F*H/G
     return numerator/denominator, macs

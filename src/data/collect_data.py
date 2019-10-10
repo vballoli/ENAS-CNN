@@ -28,14 +28,20 @@ ais = [i[2] for i in metrics]
 latencies = [i[3] for i in metrics]
 
 plt.subplot(131)
-x, y = zip(*sorted(zip(latencies, params)))
+x, y = zip(*sorted(zip(params, latencies)))
 plt.plot(x, y)
+plt.xlabel("Latency")
+plt.ylabel("Parameters")
 plt.subplot(132)
-x, y = zip(*sorted(zip(latencies, flops)))
+x, y = zip(*sorted(zip(flops, latencies)))
 plt.plot(x, y)
+plt.xlabel("Latency")
+plt.ylabel("FLOPS")
 plt.subplot(133)
-x, y = zip(*sorted(zip(latencies, ais)))
+x, y = zip(*sorted(zip(ais, latencies)))
 plt.plot(x, y)
+plt.xlabel("Latency")
+plt.ylabel("Arithmetic Intensity")
 plt.suptitle("Comparision with latencies")
 
 plt.show()
