@@ -51,6 +51,7 @@ def conv_fn(layer, x, y):
         denominator = (M*N*K*K)+((B*(M+N)*F*H)/G)
         macs = B*M*N*K*K*F*H/G
         layer.total_ai += (numerator/denominator)
+        layer.total_macs += macs
 
 handler_collection = []
 
@@ -59,6 +60,7 @@ def add_hook(layer):
         return
 
     layer.register_buffer('total_ai', torch.zeros(1))
+    layer.register_buffer('total_macs', torch.zeros(1))
     handler = layer.register_forward_hook(conv_fn)
     handler_collection.append(handler)
     print("Registered %s" % str(layer))
