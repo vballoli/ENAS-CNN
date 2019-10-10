@@ -1,5 +1,6 @@
 import torch
-from .utils import read_model, extract_layers, get_layer_properties
+from utils import read_model, extract_layers, get_layer_properties, add_hook
+import copy
 
 class ArithmeticIntensity(object):
     """
@@ -13,12 +14,13 @@ class ArithmeticIntensity(object):
         assert len(input_dims) == 3 or len(input_dims) == 4, "Invalid input dimensions"
         assert data_format in ["NHWC", "NCHW", "HWC", "CHW"], 'Invalid data format, should be in ["NHWC", "NCHW", "HWC", "CHW"]'
         if model:
-            self.model = model
+            self.model = copy.deepcopy(model)
         else:
             try:
                 self.model = read_model(path)
             except:
                 assert False, "Read model error"
+        self.model
         self.layers = extract_layers(model, [])
         self.data_format = data_format
         if len(data_format) == 3:
@@ -38,22 +40,14 @@ class ArithmeticIntensity(object):
 
     def get_metrics(self):
         """
-
         """
         dummy = torch.ones(1, *self.input_dims[1:])
-        print("Dummy: ", dummy.size())
-        ai_sum = 0
-        macs_sum = 0
-        for layer in self.layers:
-            if layer.__str__().find('Conv2d') > -1:
-                print(layer)
-                ai, macs = get_layer_properties(layer, self.batch_size, dummy.size()[2:])
-                ai_sum += ai
-                macs_sum += macs
-            try:
-                dummy = layer(dummy)
-            except:
-                break
-        print("Arithmetic Intensity: ", ai_sum)
-        print("MACS: ", macs_sum)
-        return ai_sum, macs_sum
+        model.apply(add_hook)
+        with torch.no_grad():
+            model(torch.ones(1, 3, 224, 224))
+        total_ai = 0
+        for m in model.modules():
+            if len(list(m.children())) > 0:  # skip for non-leaf module
+                continue
+            total_ai += m.total_ai
+        return total_ai
