@@ -58,3 +58,24 @@ class Cutout(object):
         mask.expand_as(image)
         return img*mask
 
+
+class AverageMeter(object):
+    """General class to compute and store average and current values.
+    """
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.val = 0
+        self.avg = 0
+        self.sum = 0
+        self.count = 0
+
+    def update(self, val, n=1):
+        """
+        Update the meter's metrics for val
+        """
+        self.val = val
+        self.sum += val*n
+        self.count += n
+        self.avg = self.sum / self.count
