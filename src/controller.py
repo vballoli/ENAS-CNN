@@ -5,7 +5,7 @@ from torch.distributions import Categorical
 from torch.nn import (LSTM, RNN, Conv2d, Embedding, Linear, LSTMCell, RNNCell,
                       Sequential)
 
-from logger import get_logger
+from .logger import get_logger
 
 
 class Controller(nn.Module):
