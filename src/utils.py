@@ -1,4 +1,5 @@
 import torch
+import sys
 
 
 class Cutout(object):
@@ -11,7 +12,7 @@ class Cutout(object):
         tensor_format(str): 'CHW' or 'HWC' (case insensitve) where C=Channels, H=Height, W=Width.
     """
 
-    def __init__(self, n_holes, length. tensor_format='CHW'):
+    def __init__(self, n_holes, length, p=0.5, tensor_format='CHW'):
         """Initialize the cutout class.
         
         Args:
@@ -21,8 +22,10 @@ class Cutout(object):
         """
         assert type(n_holes)==int, "Wrong dtype of n_holes, required integer, received {}".format(type(n_holes))
         assert type(length)==int, "Wrong dtype of length, required integer, received {}".format(type(length))
+        assert p > 0 and p < 1, "Range of p in (0, 1), received {}".format(p)
         self.n_holes = n_holes
         self.length = length
+        self.p = p
         if tensor_format.upper() in ['CHW', 'HWC']:
             self.tensor_format = tensor_format.upper()
         else:
@@ -36,27 +39,30 @@ class Cutout(object):
         Returns:
             Tensor: Image with n_holes of dimension length x length cutout of the original image.
         """
-        if self.tensor_format == 'NCHW':
-            h = image.size(1)
-            w = image.size(2)
-        elif self.tensor_format == 'HWC':
-            h = image.size(0)
-            w = image.size(1)
-        mask = torch.ones((h, w), torch.float32)
+        if np.random.randn() < self.p:
+            if self.tensor_format == 'NCHW':
+                h = image.size(1)
+                w = image.size(2)
+            elif self.tensor_format == 'HWC':
+                h = image.size(0)
+                w = image.size(1)
+            mask = torch.ones((h, w), torch.float32)
 
-        for n in self.range(self.n_holes):
-            y = torch.randint(h)
-            x = torch.randint(w)
+            for n in self.range(self.n_holes):
+                y = torch.randint(h)
+                x = torch.randint(w)
 
-            y1 = torch.clamp(y - self.length // 2, 0, h)
-            y2 = torch.clamp(y + self.length // 2, 0, h)
-            x1 = torch.clamp(x - self.length // 2, 0, w)
-            x2 = torch.clamp(x + self.length // 2, 0, w)
+                y1 = torch.clamp(y - self.length // 2, 0, h)
+                y2 = torch.clamp(y + self.length // 2, 0, h)
+                x1 = torch.clamp(x - self.length // 2, 0, w)
+                x2 = torch.clamp(x + self.length // 2, 0, w)
 
-            mask[y1: y2, 1: x2] = 0
+                mask[y1: y2, x1: x2] = 0
 
-        mask.expand_as(image)
-        return img*mask
+            mask.expand_as(image)
+            image = image * mask
+
+        return image
 
 
 class AverageMeter(object):
@@ -79,3 +85,20 @@ class AverageMeter(object):
         self.sum += val*n
         self.count += n
         self.avg = self.sum / self.count
+
+
+class Logger(object):
+    def __init__(self, filename):
+        self.terminal = sys.stdout
+        self.log = open(filename, 'w')
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+        self.log.flush()
+
+    def flush(self):
+        #this flush method is needed for python 3 compatibility.
+        #this handles the flush command by doing nothing.
+        #you might want to specify some extra behavior here.
+        pass
