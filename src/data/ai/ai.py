@@ -1,5 +1,5 @@
 import torch
-from utils import read_model, extract_layers, get_layer_properties, add_hook
+from .utils import read_model, extract_layers, get_layer_properties, add_hook
 import copy
 
 class ArithmeticIntensity(object):
