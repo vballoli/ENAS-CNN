@@ -1,5 +1,6 @@
 import torch
 import sys
+import numpy as np
 
 
 class Cutout(object):
@@ -39,25 +40,30 @@ class Cutout(object):
         Returns:
             Tensor: Image with n_holes of dimension length x length cutout of the original image.
         """
-        if torch.randn(1) < self.p:
+        if np.random.rand() < self.p:
             if self.tensor_format == 'CHW':
                 h = image.size(1)
                 w = image.size(2)
             elif self.tensor_format == 'HWC':
                 h = image.size(0)
                 w = image.size(1)
-            mask = torch.ones((h, w), dtype=torch.float32)
+            
+            mask = np.ones((h, w), np.float32)
 
             for n in range(self.n_holes):
-                y = torch.randint(h, (1, 1))
-                x = torch.randint(w, (1, 1))
+                y = np.random.randint(h)
+                x = np.random.randint(w)
 
-                y1 = torch.clamp(y - self.length // 2, 0, h)
-                y2 = torch.clamp(y + self.length // 2, 0, h)
-                x1 = torch.clamp(x - self.length // 2, 0, w)
-                x2 = torch.clamp(x + self.length // 2, 0, w)
+                y1 = np.clip(y - self.length, 0, h)
+                y2 = np.clip(y + self.length, 0, h)
+                x1 = np.clip(x - self.length, 0, w)
+                x2 = np.clip(x + self.length, 0, w)
 
-                mask[y1: y2, x1: x2] = 0
+                mask[y1: y2, x1: x2] = 0.
+
+                mask = torch.from_numpy(mask)
+                mask = mask.expand_as(image)
+                image = image * mask
 
             mask.expand_as(image)
             image = image * mask
