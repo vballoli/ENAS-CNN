@@ -39,18 +39,18 @@ class Cutout(object):
         Returns:
             Tensor: Image with n_holes of dimension length x length cutout of the original image.
         """
-        if np.random.randn() < self.p:
-            if self.tensor_format == 'NCHW':
+        if torch.randn(1) < self.p:
+            if self.tensor_format == 'CHW':
                 h = image.size(1)
                 w = image.size(2)
             elif self.tensor_format == 'HWC':
                 h = image.size(0)
                 w = image.size(1)
-            mask = torch.ones((h, w), torch.float32)
+            mask = torch.ones((h, w), dtype=torch.float32)
 
-            for n in self.range(self.n_holes):
-                y = torch.randint(h)
-                x = torch.randint(w)
+            for n in range(self.n_holes):
+                y = torch.randint(h, (1, 1))
+                x = torch.randint(w, (1, 1))
 
                 y1 = torch.clamp(y - self.length // 2, 0, h)
                 y2 = torch.clamp(y + self.length // 2, 0, h)
